@@ -1,7 +1,22 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/AuthContext'
+import { supabase } from '../lib/supabase'
 
 export default function Layout({ children }) {
+  async function handleChangePassword() {
+    const newPassword = window.prompt('Введіть новий пароль (мінімум 6 символів):')
+    if (!newPassword) return
+    if (newPassword.length < 6) {
+      alert('Пароль має бути не менше 6 символів')
+      return
+    }
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) {
+      alert('Помилка: ' + error.message)
+    } else {
+      alert('Пароль успішно змінено!')
+    }
+  }
   const { isTrainer, signOut, profile } = useAuth()
 
   return (
@@ -17,7 +32,8 @@ export default function Layout({ children }) {
           )}
           <div style={styles.spacer} />
           <span style={styles.userName}>{profile?.full_name || ''}</span>
-          <button style={styles.signOut} onClick={signOut}>Вийти</button>
+          <<button style={styles.signOut} onClick={handleChangePassword}>Пароль</button>
+<button style={styles.signOut} onClick={signOut}>Вийти</button>
         </div>
       </header>
       <main style={styles.main}>{children}</main>
