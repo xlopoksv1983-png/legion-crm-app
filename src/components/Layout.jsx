@@ -32,7 +32,7 @@ export default function Layout({ children }) {
           )}
           <div style={styles.spacer} />
           <span style={styles.userName}>{profile?.full_name || ''}</span>
-          <<button style={styles.signOut} onClick={handleChangePassword}>Пароль</button>
+          <button style={styles.signOut} onClick={handleChangePassword}>Пароль</button>
 <button style={styles.signOut} onClick={signOut}>Вийти</button>
         </div>
       </header>
