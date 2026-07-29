@@ -81,10 +81,38 @@ function Overview({ client, lastMeasurement, lastWorkout }) {
       <Row label="Вправа" value={lastWorkout?.exercises?.name || '—'} />
       <hr style={styles.hr} />
       <b>Нотатки тренера</b>
-      <p style={{ color: '#444' }}>{client.trainer_comment || '—'}</p>
+    <p style={{ color: '#444' }}>{client.trainer_comment || '-'}</p>
+    <hr style={styles.hr} />
+    <b>Акаунт клієнта</b>
+    {client.user_id ? (
+      <p style={{ color: '#1F4E78', marginTop: 4 }}>Клієнт уже має акаунт</p>
+    ) : (
+      <InviteBlock token={client.invite_token} />
+    )}
+  </div>
+  )
+}
+
+function InviteBlock({ token }) {
+  const [copied, setCopied] = useState(false)
+  const link = `${window.location.origin}/?invite=${token}`
+
+  function copy() {
+    navigator.clipboard.writeText(link)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div style={{ marginTop: 4 }}>
+      <p style={{ fontSize: 13, wordBreak: 'break-all', color: '#666' }}>{link}</p>
+      <button onClick={copy} style={{ padding: '8px 14px', borderRadius: 8, border: 'none', background: '#1F4E78', color: '#fff', fontSize: 13, cursor: 'pointer' }}>
+        {copied ? 'Скопійовано!' : 'Копіювати посилання'}
+      </button>
     </div>
   )
 }
+
 
 function Row({ label, value }) {
   return (

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
 export default function Login() {
@@ -6,11 +6,36 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [inviteToken, setInviteToken] = useState(null)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('invite')
+    if (token) setInviteToken(token)
+  }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
     setLoading(true)
+
+    if (inviteToken) {
+      const { error: signUpError } = await supabase.auth.signUp({ email, password })
+      if (signUpError) {
+        setError(signUpError.message)
+        setLoading(false)
+        return
+      }
+      const { error: claimError } = await supabase.rpc('claim_client_invite', { token: inviteToken })
+      if (claimError) {
+        setError('Помилка запрошення: ' + claimError.message)
+        setLoading(false)
+        return
+      }
+      window.location.href = window.location.origin
+      return
+    }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) setError('Невірний email або пароль')
     setLoading(false)
@@ -20,7 +45,9 @@ export default function Login() {
     <div style={styles.wrap}>
       <form style={styles.card} onSubmit={handleSubmit}>
         <h1 style={styles.title}>Legion CRM</h1>
-        <p style={styles.subtitle}>Увійдіть у свій акаунт</p>
+        <p style={styles.subtitle}>
+          {inviteToken ? 'Створіть акаунт клієнта' : 'Увійдіть у свій акаунт'}
+        </p>
         <input
           style={styles.input}
           type="email"
@@ -39,7 +66,7 @@ export default function Login() {
         />
         {error && <p style={styles.error}>{error}</p>}
         <button style={styles.button} type="submit" disabled={loading}>
-          {loading ? 'Вхід...' : 'Увійти'}
+          {loading ? 'Зачекайте...' : inviteToken ? 'Створити акаунт' : 'Увійти'}
         </button>
       </form>
     </div>
